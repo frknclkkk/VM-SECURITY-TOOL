@@ -17,7 +17,7 @@ Clone the repository and install the dependencies:
 git clone https://github.com/frknclkkk/VM-Security-Tool.git
 cd VM-Security-Tool
 python3 -m venv venv
-source venv/bin/activate  # For Windows: venv\Scripts\activate
+source venv/bin/activate 
 pip install -r requirements.txt
 ```
 
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 Run the main scanner script:
 
 ```bash
-python virtual_security_scanner.py
+python3 -m vm_security_tool.cli
 ```
 
 The tool will begin scanning your system and display results in the terminal.
