@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: vm_security_tool
+Version: 1.0.0
+Summary: Virtual Machine Security Scanner
+Author: Your Name
+License: MIT
+Requires-Python: >=3.6
+Requires-Dist: psutil>=5.8.0
+Dynamic: author
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

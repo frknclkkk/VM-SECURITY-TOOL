@@ -1,0 +1,2 @@
+[console_scripts]
+vm-security-scan = vm_security_tool.cli:main
