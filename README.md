@@ -35,8 +35,8 @@ The tool will begin scanning your system and display results in the terminal.
 ## 📁 Project Structure
 
 - 'cli.py': Main application script.
-- `.gitignore`: Files and directories excluded from Git.
-- `README.md`: Project documentation and usage guide.
+- '.gitignore': Files and directories excluded from Git.
+- 'README.md': Project documentation and usage guide.
 
 ## ✅ Requirements
 
