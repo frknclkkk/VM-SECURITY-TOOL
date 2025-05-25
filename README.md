@@ -18,7 +18,8 @@ git clone https://github.com/frknclkkk/VM-Security-Tool.git
 cd VM-Security-Tool
 python3 -m venv venv
 source venv/bin/activate 
-pip install -r requirements.txt
+pip install -r \vm_security_tool.egg-info\requires.txt
+
 ```
 
 ## ▶️ Usage
