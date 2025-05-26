@@ -20,7 +20,7 @@ python3 -m venv venv
 source venv/bin/activate 
 cd vm_security_tool.egg-info/
 pip install -r requires.txt
-
+cd ..
 ```
 
 ## ▶️ Usage
@@ -38,11 +38,12 @@ The tool will begin scanning your system and display results in the terminal.
 - 'cli.py': Main application script.
 - '.gitignore': Files and directories excluded from Git.
 - 'README.md': Project documentation and usage guide.
+- "scanners" : All scanners are here.
 
 ## ✅ Requirements
 
 - Python 3.8 or higher
-- Linux based VM environment
+- Linux based VM environment (For now not Kali Lınux)
 - Internet access (for some network features)
 
 ## 📄 License
