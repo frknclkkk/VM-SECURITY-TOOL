@@ -59,12 +59,11 @@ class SecurityToolCLI:
         print("4. SSH Brute Force Scan")
         print("5. Run All Scans")
         print("6. Live SSH Monitor")
-        print("7. List Blocked IPs")
-        print("8. Exit")
-        return input("\nSelect an option (1-8): ").strip()
+        print("7. Exit")
+        return input("\nSelect an option (1-7): ").strip()
 
     def interactive_mode(self):
-        """Run in interactive menu mode"""
+        """Run in interactive menu mode with improved error handling"""
         while True:
             choice = self.show_menu()
 
@@ -79,18 +78,16 @@ class SecurityToolCLI:
             elif choice == "5":
                 self.scanner.run_all()
             elif choice == "6":
-                duration = input("Enter monitoring duration in minutes: ").strip()
                 try:
+                    duration = input("Enter monitoring duration in minutes (0 for continuous): ").strip()
                     monitor = LiveSSHMonitor(alert_sender=self.alert_sender)
-                    monitor.monitor(duration_minutes=int(duration))
-                    if monitor.monitor(duration_minutes=int(duration) == duration):
-                        break
-                except ValueError:
-                    logger.log("Invalid duration. Please enter a number.", "ERROR")
-
+                    if duration.isdigit():
+                        monitor.monitor(duration_minutes=int(duration) if int(duration) > 0 else None)
+                    else:
+                        logger.log("Invalid duration. Please enter a number.", "ERROR")
+                except Exception as e:
+                    logger.log(f"Error in live monitoring: {str(e)}", "ERROR")
             elif choice == "7":
-                self.list_blocked_ips()
-            elif choice == "8":
                 logger.log("👋 Exiting...", "INFO")
                 break
             else:
@@ -128,19 +125,19 @@ class SecurityScanner:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="VM Security Scanner")
+    parser = argparse.ArgumentParser(description="VM Security Scanner with Enhanced Remediation")
 
     # Scan options
     scan_group = parser.add_argument_group('Scan Options')
-    scan_group.add_argument("--all", action="store_true", help="Run all scans")
+    scan_group.add_argument("--all", action="store_true", help="Run all security scans")
     scan_group.add_argument("--network", action="store_true", help="Run network scan")
     scan_group.add_argument("--process", action="store_true", help="Run process scan")
     scan_group.add_argument("--ports", action="store_true", help="Run port scan")
     scan_group.add_argument("--ssh", action="store_true", help="Run SSH brute force scan")
     scan_group.add_argument("--live-ssh", type=int, metavar='MINUTES',
-                            help="Monitor SSH attacks live for specified minutes")
+                            help="Monitor SSH attacks live for specified minutes (0 for continuous)")
 
-    # Remediation options
+    # Enhanced remediation options
     remediation_group = parser.add_argument_group('Remediation Actions')
     remediation_group.add_argument(
         '--list-blocked',
@@ -152,34 +149,58 @@ def main():
         metavar='IP_ADDRESS',
         help='Remove block for a specific IP address'
     )
+    remediation_group.add_argument(
+        '--block-ip',
+        metavar='IP_ADDRESS',
+        help='Manually block a specific IP address'
+    )
+    remediation_group.add_argument(
+        '--method',
+        choices=['iptables', 'ufw'],
+        default='iptables',
+        help='Firewall method to use for blocking (iptables or ufw)'
+    )
 
     args = parser.parse_args()
     cli = SecurityToolCLI()
 
-    # Handle remediation actions first
-    if args.list_blocked:
-        cli.list_blocked_ips()
-    elif args.unblock_ip:
-        cli.remediator.unblock_ip(args.unblock_ip)
-    # Then handle scan options
-    elif args.all:
-        cli.scanner.run_all()
-    elif args.live_ssh is not None:
-        monitor = LiveSSHMonitor(alert_sender=cli.alert_sender)
-        monitor.monitor(duration_minutes=args.live_ssh)
-    elif any([args.network, args.process, args.ports, args.ssh]):
-        selected = []
-        if args.network:
-            selected.append("network")
-        if args.process:
-            selected.append("process")
-        if args.ports:
-            selected.append("ports")
-        if args.ssh:
-            selected.append("ssh")
-        cli.scanner.run_selected(selected)
-    else:
-        cli.interactive_mode()
+    try:
+        # Handle remediation actions first
+        if args.list_blocked:
+            cli.list_blocked_ips()
+            return
+
+        if args.unblock_ip:
+            if cli.remediator.unblock_ip(args.unblock_ip):
+                logger.log(f"Successfully unblocked {args.unblock_ip}", "SUCCESS")
+            return
+
+        if args.block_ip:
+            if cli.remediator.block_ip(args.block_ip, method=args.method):
+                logger.log(f"Successfully blocked {args.block_ip} using {args.method}", "SUCCESS")
+            return
+
+        # Then handle scan options
+        if args.all:
+            cli.scanner.run_all()
+        elif args.live_ssh is not None:
+            monitor = LiveSSHMonitor(alert_sender=cli.alert_sender)
+            monitor.monitor(duration_minutes=args.live_ssh if args.live_ssh > 0 else None)
+        elif any([args.network, args.process, args.ports, args.ssh]):
+            selected = []
+            if args.network: selected.append("network")
+            if args.process: selected.append("process")
+            if args.ports: selected.append("ports")
+            if args.ssh: selected.append("ssh")
+            cli.scanner.run_selected(selected)
+        else:
+            cli.interactive_mode()
+
+    except KeyboardInterrupt:
+        logger.log("\nOperation cancelled by user", "INFO")
+    except Exception as e:
+        logger.log(f"Critical error: {str(e)}", "CRITICAL")
+        raise
 
 
 if __name__ == "__main__":
