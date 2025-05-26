@@ -6,6 +6,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'psutil>=5.8.0',
+        'netifaces'
           # For direct iptables access
     ],
     package_data={
