@@ -15,10 +15,11 @@ Clone the repository and install the dependencies:
 
 ```bash
 git clone https://github.com/frknclkkk/VM-SECURITY-TOOL
-cd VM-Security-Tool
+cd VM-SECURITY-TOOL
 python3 -m venv venv
 source venv/bin/activate 
-pip install -r /VM-SECURITY-TOOL/vm_security_tool.egg-info/requires.txt 
+cd vm_security_tool.egg-info/
+pip install -r requires.txt
 
 ```
 
